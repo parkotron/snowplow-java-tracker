@@ -19,8 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'war'
 
 dependencies {
-    compile project(':snowplow-java-tracker-core')
-    runtime project(':snowplow-java-tracker-core')
+    compile 'com.snowplowanalytics:snowplow-java-tracker-core:0.1.1'
 }
 
 allprojects {
@@ -28,6 +27,9 @@ allprojects {
     group = 'com.snowplowanalytics'
     version = '0.5.1'
     repositories {
+        maven {
+            url "http://maven.snplow.com/releases"
+        }
         // Use 'maven central' for resolving our dependencies
         mavenCentral()
     }
