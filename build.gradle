@@ -16,10 +16,8 @@ apply plugin: 'java'
 // As per http://www.gradle.org/docs/current/userguide/publishing_maven.html
 apply plugin: 'maven-publish'
 
-apply plugin: 'war'
-
 dependencies {
-    compile 'com.snowplowanalytics:snowplow-java-tracker-core:0.1.1'
+    compile 'com.snowplowanalytics:snowplow-java-tracker-core:0.1.2'
 }
 
 allprojects {
