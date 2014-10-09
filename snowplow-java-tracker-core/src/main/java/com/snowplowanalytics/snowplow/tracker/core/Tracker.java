@@ -282,7 +282,7 @@ public class Tracker {
                         A "data" field containing the event properties and
                         A "schema" field identifying the schema against which the data is validated
      */
-    public void trackUnstructuredEvent(Map<String, Object> eventData) {
+    public void trackUnstructuredEvent(SchemaPayload eventData) {
         trackUnstructuredEvent(eventData, null, 0);
     }
 
@@ -293,7 +293,7 @@ public class Tracker {
      *                   A "schema" field identifying the schema against which the data is validated
      * @param context Custom context for the event
      */
-    public void trackUnstructuredEvent(Map<String, Object> eventData, List<SchemaPayload> context) {
+    public void trackUnstructuredEvent(SchemaPayload eventData, List<SchemaPayload> context) {
         trackUnstructuredEvent(eventData, context, 0);
     }
 
@@ -304,7 +304,7 @@ public class Tracker {
      *                   A "schema" field identifying the schema against which the data is validated
      * @param timestamp Optional user-provided timestamp for the event
      */
-    public void trackUnstructuredEvent(Map<String, Object> eventData, long timestamp) {
+    public void trackUnstructuredEvent(SchemaPayload eventData, long timestamp) {
         trackUnstructuredEvent(eventData, null, timestamp);
     }
 
@@ -316,13 +316,13 @@ public class Tracker {
      * @param context Custom context for the event
      * @param timestamp Optional user-provided timestamp for the event
      */
-    public void trackUnstructuredEvent(Map<String, Object> eventData, List<SchemaPayload> context,
+    public void trackUnstructuredEvent(SchemaPayload eventData, List<SchemaPayload> context,
                                        long timestamp) {
         Payload payload = new TrackerPayload();
         SchemaPayload envelope = new SchemaPayload();
 
         envelope.setSchema(unstructSchema);
-        envelope.setData(eventData);
+        envelope.setData(eventData.getMap());
 
         payload.add(Parameter.EVENT, Constants.EVENT_UNSTRUCTURED);
         payload.addMap(envelope.getMap(), base64Encoded,
@@ -545,6 +545,6 @@ public class Tracker {
                 this.schemaTag + "/" + this.schemaVersion);
         payload.setData(trackerPayload);
 
-        trackUnstructuredEvent(payload.getMap(), context, timestamp);
+        trackUnstructuredEvent(payload, context, timestamp);
     }
 }
