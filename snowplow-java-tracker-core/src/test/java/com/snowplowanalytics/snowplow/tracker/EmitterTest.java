@@ -74,7 +74,7 @@ public class EmitterTest {
 
         verify(postRequestedFor(urlEqualTo("/com.snowplowanalytics.snowplow/tp2"))
                 .withHeader("Content-Type", equalTo("application/json; charset=utf-8"))
-                .withRequestBody(equalToJson("{\"schemas\":\"iglu:com.snowplowanalytics.snowplow/" +
+                .withRequestBody(equalToJson("{\"schema\":\"iglu:com.snowplowanalytics.snowplow/" +
                         "payload_data/jsonschema/1-0-0\",\"data\":[{\"someValue\":\"someKey\"," +
                         "\"values\":\"[value1, value2]\"}]}")));
     }
