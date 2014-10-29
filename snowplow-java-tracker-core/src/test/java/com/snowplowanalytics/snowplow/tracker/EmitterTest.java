@@ -1,7 +1,5 @@
 package com.snowplowanalytics.snowplow.tracker;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.snowplowanalytics.snowplow.tracker.core.emitter.BufferOption;
 import com.snowplowanalytics.snowplow.tracker.core.emitter.Emitter;
@@ -68,7 +66,6 @@ public class EmitterTest {
         payload.addMap(foo);
 
         emitter.addToBuffer(payload);
-
 
         emitter.flushBuffer();
 
