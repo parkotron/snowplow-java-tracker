@@ -160,11 +160,13 @@ public class Emitter {
             LinkedList<Payload> unsentPayloads = new LinkedList<Payload>();
 
             for (Payload payload : buffer) {
-                int status_code = sendGetData(payload).getStatusLine().getStatusCode();
-                if (status_code == 200)
-                    success_count++;
-                else
+
+                HttpResponse response = sendGetData(payload);
+                if (response != null) {
+                    if (response.getStatusLine().getStatusCode() == 200) success_count++;
+                } else {
                     unsentPayloads.add(payload);
+                }
             }
 
             if (unsentPayloads.size() == 0) {
@@ -186,8 +188,8 @@ public class Emitter {
             }
             postPayload.setData(eventMaps);
 
-            int status_code = sendPostData(postPayload).getStatusLine().getStatusCode();
-            if (status_code == 200 && requestCallback != null)
+            HttpResponse response = sendPostData(postPayload);
+            if (response != null && response.getStatusLine().getStatusCode() == 200 && requestCallback != null)
                 requestCallback.onSuccess(buffer.size());
             else if (requestCallback != null){
                 unsentPayload.add(postPayload);
@@ -260,7 +262,7 @@ public class Emitter {
             logger.error("Interruption error when sending HTTP GET request.");
             e.printStackTrace();
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            logger.error("Error when sending HTTP GET error.");
         }
         return httpResponse;
     }
