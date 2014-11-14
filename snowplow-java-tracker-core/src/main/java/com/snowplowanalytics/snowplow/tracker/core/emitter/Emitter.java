@@ -26,6 +26,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,13 @@ public class Emitter {
     protected BufferOption option = BufferOption.Default;
     protected RequestCallback requestCallback;
     protected HttpMethod httpMethod = HttpMethod.GET;
+
+    protected RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(1000)
+            .setSocketTimeout(1000)
+            .setConnectionRequestTimeout(1000)
+            .setStaleConnectionCheckEnabled(true)
+            .build();
 
     /**
      * Default constructor does nothing.
@@ -107,7 +115,8 @@ public class Emitter {
         }
         this.requestCallback = callback;
         this.httpMethod = httpMethod;
-        this.httpClient = HttpClients.createDefault();
+
+        this.httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
 
         if (httpMethod == HttpMethod.GET) {
             this.setBufferOption(BufferOption.Instant);
@@ -130,7 +139,7 @@ public class Emitter {
      */
     public void setRequestMethod(RequestMethod option) {
         this.requestMethod = option;
-        this.httpAsyncClient = HttpAsyncClients.createDefault();
+        this.httpAsyncClient = HttpAsyncClients.custom().setDefaultRequestConfig(requestConfig).build();
         this.httpAsyncClient.start();
     }
 
@@ -215,7 +224,12 @@ public class Emitter {
             } else {
                 httpResponse = httpClient.execute(httpPost);
             }
-            logger.debug(httpResponse.getStatusLine().toString());
+
+            if (httpResponse != null) {
+                logger.debug(httpResponse.getStatusLine().toString());
+            } else {
+                logger.debug("HTTPResponse was null");
+            }
         } catch (UnsupportedEncodingException e) {
             logger.error("Encoding exception with the payload.");
             e.printStackTrace();
@@ -227,15 +241,23 @@ public class Emitter {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (httpResponse != null) httpResponse.getEntity().getContent().close();
+                httpPost.releaseConnection();
+            } catch (IOException e) {
+                logger.error("Error when closing resource.");
+            }
         }
+
         return httpResponse;
     }
 
-    @SuppressWarnings("unchecked")
     protected HttpResponse sendGetData(Payload payload) {
         HashMap hashMap = (HashMap) payload.getMap();
         Iterator<String> iterator = hashMap.keySet().iterator();
         HttpResponse httpResponse = null;
+        HttpGet httpGet = null;
 
         while (iterator.hasNext()) {
             String key = iterator.next();
@@ -244,14 +266,21 @@ public class Emitter {
         }
 
         try {
-            HttpGet httpGet = new HttpGet(uri.build());
+            httpGet = new HttpGet(uri.build());
             if (requestMethod == RequestMethod.Asynchronous) {
                 Future<HttpResponse> future = httpAsyncClient.execute(httpGet, null);
                 httpResponse = future.get();
             } else {
                 httpResponse = httpClient.execute(httpGet);
             }
-            logger.debug(httpResponse.getStatusLine().toString());
+
+            if (httpResponse != null) {
+                logger.debug(httpResponse.getStatusLine().toString());
+            } else {
+                logger.debug("HTTPResponse was null");
+            }
+        } catch (org.apache.http.conn.HttpHostConnectException e) {
+            logger.error("Error when sending HTTP GET error.");
         } catch (IOException e) {
             logger.error("Error when sending HTTP GET error.");
             e.printStackTrace();
@@ -263,7 +292,16 @@ public class Emitter {
             e.printStackTrace();
         } catch (ExecutionException e) {
             logger.error("Error when sending HTTP GET error.");
+        } finally {
+            try {
+                if (httpResponse != null) httpResponse.getEntity().getContent().close();
+                if (httpGet != null) httpGet.releaseConnection();
+            } catch (IOException e) {
+                logger.error("Error when closing resource.");
+            }
         }
+
+
         return httpResponse;
     }
 }

@@ -18,6 +18,9 @@ apply plugin: 'maven-publish'
 
 apply plugin: 'war'
 
+sourceCompatibility = 1.6 
+targetCompatibility = 1.6
+
 dependencies {
     compile project(':snowplow-java-tracker-core')
     runtime project(':snowplow-java-tracker-core')
